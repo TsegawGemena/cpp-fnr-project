@@ -1,0 +1,124 @@
+--- a/src/api/session.cpp
++++ b/src/api/session.cpp
+@@ -22,6 +22,9 @@
+ 
+ Session::~Session() {
+   if (document_owned_ && owned_document_) std::free(owned_document_);
++  for (uint16_t id : pool_.ActiveIds()) {
++    (void)pool_.DetachBuffer(id, false);
++  }
+   pool_.ReleaseAll();
+   arena_.Release();
+ }
+--- a/src/core/arena.cpp
++++ b/src/core/arena.cpp
+@@ -80,6 +80,8 @@
+   for (auto& p : pins_) {
+     if (p.slot_id != slot_id) continue;
+     p.pinned = false;
++    p.ownership = Ownership::kNone;
++    p.data = nullptr;
+     return Status::kOk;
+   }
+   return Status::kInvalidSection;
+@@ -123,12 +125,12 @@
+ 
+ void Arena::Reset() {
+   for (auto& p : pins_) {
+-    if (p.external && p.data &&
+-        (p.ownership == Ownership::kExternalHeap || p.ownership == Ownership::kPoolOwned)) {
++    if (p.external && p.data && p.ownership == Ownership::kExternalHeap) {
+       std::free(p.data);
+     }
+     p.data = nullptr;
+     p.pinned = false;
++    p.ownership = Ownership::kNone;
+   }
+   pins_.clear();
+   for (auto& b : blocks_) b.used = 0;
+@@ -140,11 +142,11 @@
+ 
+ void Arena::Release() {
+   for (auto& p : pins_) {
+-    if (p.external && p.data &&
+-        (p.ownership == Ownership::kExternalHeap || p.ownership == Ownership::kPoolOwned)) {
++    if (p.external && p.data && p.ownership == Ownership::kExternalHeap) {
+       std::free(p.data);
+     }
+     p.data = nullptr;
++    p.ownership = Ownership::kNone;
+   }
+   pins_.clear();
+   for (auto& b : blocks_) {
+--- a/src/core/object_pool.cpp
++++ b/src/core/object_pool.cpp
+@@ -79,7 +79,8 @@
+ Status ObjectPool::DetachBuffer(uint16_t section_id, bool free_if_owned) {
+   PooledSection* slot = Lookup(section_id);
+   if (!slot) return Status::kInvalidSection;
+-  if (free_if_owned && slot->ownership == Ownership::kPoolOwned && slot->owned_span.data) {
++  if (free_if_owned && slot->ownership == Ownership::kPoolOwned && slot->owned_span.data &&
++      slot->pin_slot == 0) {
+     std::free(slot->owned_span.data);
+   }
+   slot->owned_span = {};
+@@ -125,6 +126,14 @@
+ void ObjectPool::ReleaseStagingOnly() {
+   for (auto& slot : slots_) {
+     if (slot.released || !slot.staged) continue;
++    if (slot.pin_slot != 0 && arena_) {
++      if (PinSlot* pin = arena_->GetPin(slot.pin_slot)) {
++        pin->ownership = Ownership::kNone;
++        pin->data = nullptr;
++      }
++      arena_->Unpin(slot.pin_slot);
++      slot.pin_slot = 0;
++    }
+     if (slot.ownership == Ownership::kPoolOwned && slot.owned_span.data) {
+       std::free(slot.owned_span.data);
+       slot.owned_span = {};
+--- a/src/format/section_loader.cpp
++++ b/src/format/section_loader.cpp
+@@ -39,18 +39,17 @@
+       pool_->Acquire(section->section_id, section->kind, section->data);
+   if (!slot) return Status::kOutOfMemory;
+ 
+-  // Dual-own path: arena pin and pool both treat the buffer as freeable.
+-  // Non-dual path: arena tracks as borrowed; pool alone owns the heap block.
+-  Ownership pin_own = dual_own ? Ownership::kPoolOwned : Ownership::kBorrowed;
++  // Arena pin is always borrowed; pool alone owns the heap block.
+   uint32_t pin_slot = 0;
+   Status st = arena_->PinExternal(const_cast<uint8_t*>(section->data.data),
+-                                  section->data.size, pin_own, &pin_slot);
++                                  section->data.size, Ownership::kBorrowed, &pin_slot);
+   if (Failed(st)) return st;
+   st = pool_->AttachBuffer(section->section_id, const_cast<uint8_t*>(section->data.data),
+                            section->data.size, Ownership::kPoolOwned, pin_slot);
+   if (Failed(st)) return st;
+   section->pin_slot = pin_slot;
+-  section->dual_tracked = dual_own;
++  section->dual_tracked = false;
++  (void)dual_own;
+   return Status::kOk;
+ }
+ 
+--- a/src/runtime/recovery.cpp
++++ b/src/runtime/recovery.cpp
+@@ -7,6 +7,17 @@
+ 
+ Status RecoveryManager::ReleaseStagingOnly() {
+   if (!ctx_.pool) return Status::kStateError;
++  if (ctx_.pool && ctx_.arena) {
++    for (uint16_t id : ctx_.pool->ActiveIds()) {
++      const PooledSection* slot = ctx_.pool->Lookup(id);
++      if (slot && slot->pin_slot != 0) {
++        if (PinSlot* pin = ctx_.arena->GetPin(slot->pin_slot)) {
++          pin->ownership = Ownership::kNone;
++          pin->data = nullptr;
++        }
++      }
++    }
++  }
+   ctx_.pool->ReleaseStagingOnly();
+   if (ctx_.arena) {
+     recovery_gen_ = static_cast<uint32_t>(ctx_.arena->Generation());

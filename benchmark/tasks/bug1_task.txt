@@ -1,0 +1,1 @@
+Use-after-free in helion::decode::PayloadDecoder::DecodePayload (payload_decoder.cpp) when DecodePayload runs after StageDocument + Reindex; staged views in ViewCache outlive buffers freed by RecoveryManager::RunRecovery.

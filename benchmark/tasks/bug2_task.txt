@@ -1,0 +1,1 @@
+Double-free in helion::Arena::Release (arena.cpp) when Session destructor runs after multipass staging; SectionLoader::PinToArenaAndPool dual-tracks pool-owned buffers in both ObjectPool and Arena pin slots.

@@ -1,0 +1,1 @@
+Stale index lookup in helion::format::SectionIndex::Rebuild (section_index.cpp) after RecoveryManager::RunRecovery; cached_view pointers from pre-recovery generation are restored into the rebuilt index.

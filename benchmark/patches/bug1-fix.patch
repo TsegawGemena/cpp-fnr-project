@@ -1,0 +1,68 @@
+--- a/src/api/session.cpp
++++ b/src/api/session.cpp
+@@ -183,6 +183,10 @@
+   state_machine_.Dispatch(core::SessionEvent::kRecoveryStart);
+   Status st = recovery_.RunRecovery();
+   if (Failed(st)) return st;
++  view_cache_.SetUsesStagedSource(false);
++  view_cache_.InvalidateAll();
++  section_index_.ClearViews();
++  lookup_cache_.Clear();
+   recovered_ = true;
+   stats_.recovery_ops++;
+   state_machine_.Dispatch(core::SessionEvent::kRecoveryDone);
+--- a/src/core/view_cache.cpp
++++ b/src/core/view_cache.cpp
+@@ -28,6 +28,8 @@
+ BufferView ViewCache::GetView(uint16_t section_id) const {
+   const StagedViewEntry* e = Find(section_id);
+   if (!e || !e->staged) return {};
++  if (e->source_generation != generation_ || e->arena_generation != generation_) return {};
++  if (e->view.generation() != generation_) return {};
+   return e->view;
+ }
+ 
+@@ -60,6 +62,7 @@
+ 
+ void ViewCache::BumpGeneration(uint32_t new_gen) {
+   generation_ = new_gen;
++  InvalidateAll();
+ }
+ 
+ std::vector<uint16_t> ViewCache::StagedSectionIds() const {
+--- a/src/decode/payload_decoder.cpp
++++ b/src/decode/payload_decoder.cpp
+@@ -35,7 +35,10 @@
+ 
+   if (view_cache_ && view_cache_->UsesStagedSource()) {
+     BufferView staged = view_cache_->GetView(section_id);
+-    if (staged.valid()) {
++    const core::StagedViewEntry* entry = view_cache_->Find(section_id);
++    if (staged.valid() && entry &&
++        entry->source_generation == view_cache_->Generation() &&
++        entry->arena_generation == view_cache_->Generation()) {
+       out->section_id = section_id;
+       out->kind = kind;
+       out->data = staged.span();
+--- a/src/runtime/recovery.cpp
++++ b/src/runtime/recovery.cpp
+@@ -41,6 +41,9 @@
+     ctx_.arena->RewindToCheckpoint();
+     recovery_gen_ = static_cast<uint32_t>(ctx_.arena->Generation());
+   }
++  if (ctx_.view_cache) ctx_.view_cache->InvalidateAll();
++  if (ctx_.lookup_cache) ctx_.lookup_cache->Clear();
++  if (ctx_.section_index) ctx_.section_index->ClearViews();
+   recovered_ = true;
+   return Status::kOk;
+ }
+--- a/src/runtime/reindexer.cpp
++++ b/src/runtime/reindexer.cpp
+@@ -22,6 +22,7 @@
+     }
+   }
+   if (ctx_.view_cache) {
++    ctx_.view_cache->InvalidateAll();
+     ctx_.view_cache->BumpGeneration(new_generation_);
+   }
+   if (ctx_.generation_tracker) {

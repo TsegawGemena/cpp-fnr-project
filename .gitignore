@@ -1,0 +1,15 @@
+/build/
+/bin/
+/out/
+*.o
+*.a
+*.so
+crash-*
+timeout-*
+oom-*
+leak-*
+*.rej
+*.orig
+.cache/
+/tmp/
+fuzz/corpus/_gen/

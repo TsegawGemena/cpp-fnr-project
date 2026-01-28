@@ -1,0 +1,4 @@
+# Bug C — stale index after recovery
+heap-use-after-free via SectionIndex cached_view after RecoveryManager::RunRecovery
+SectionIndex::Rebuild restores pre-recovery BufferView pointers
+DecodePayload falls through to section_index Lookup when staged source is inactive

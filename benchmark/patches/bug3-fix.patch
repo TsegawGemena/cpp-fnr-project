@@ -1,0 +1,87 @@
+--- a/include/helion/core/lookup_cache.h
++++ b/include/helion/core/lookup_cache.h
+@@ -23,6 +23,7 @@
+   const LookupEntry* Lookup(uint16_t section_id) const;
+   LookupEntry* LookupMutable(uint16_t section_id);
+   void Clear();
++  void ClearForRecovery();
+   void Invalidate(uint16_t section_id);
+   size_t Size() const { return entries_.size(); }
+   uint32_t Generation() const { return generation_; }
+--- a/include/helion/format/section_index.h
++++ b/include/helion/format/section_index.h
+@@ -28,6 +28,7 @@
+   Status CacheView(uint16_t section_id, BufferView view);
+   void InvalidateView(uint16_t section_id);
+   void ClearViews();
++  void ClearCachedViews();
+   size_t Size() const { return entries_.size(); }
+   uint32_t Generation() const { return generation_; }
+   std::vector<uint16_t> SectionIds() const;
+--- a/src/api/session.cpp
++++ b/src/api/session.cpp
+@@ -183,6 +183,8 @@
+   state_machine_.Dispatch(core::SessionEvent::kRecoveryStart);
+   Status st = recovery_.RunRecovery();
+   if (Failed(st)) return st;
++  section_index_.ClearCachedViews();
++  lookup_cache_.Clear();
+   recovered_ = true;
+   stats_.recovery_ops++;
+   state_machine_.Dispatch(core::SessionEvent::kRecoveryDone);
+--- a/src/core/lookup_cache.cpp
++++ b/src/core/lookup_cache.cpp
+@@ -42,6 +42,10 @@
+   ++generation_;
+ }
+ 
++void LookupCache::ClearForRecovery() {
++  Clear();
++}
++
+ void LookupCache::Invalidate(uint16_t section_id) {
+   LookupEntry* e = LookupMutable(section_id);
+   if (e) e->valid = false;
+--- a/src/format/section_index.cpp
++++ b/src/format/section_index.cpp
+@@ -29,10 +29,6 @@
+ }
+ 
+ Status SectionIndex::Rebuild(const std::vector<SectionDesc>& descs, uint32_t generation) {
+-  std::unordered_map<uint16_t, BufferView> old_views;
+-  for (const IndexCacheEntry& e : entries_) {
+-    if (e.cached_view.valid()) old_views[e.section_id] = e.cached_view;
+-  }
+   entries_.clear();
+   map_.clear();
+   generation_ = generation;
+@@ -43,14 +39,16 @@
+     ice.length = d.length;
+     ice.generation = generation;
+     ice.live = true;
+-    auto it = old_views.find(d.section_id);
+-    if (it != old_views.end()) ice.cached_view = it->second;
+     map_[d.section_id] = entries_.size();
+     entries_.push_back(ice);
+   }
+   return Status::kOk;
+ }
+ 
++void SectionIndex::ClearCachedViews() {
++  ClearViews();
++}
++
+ const IndexCacheEntry* SectionIndex::Lookup(uint16_t section_id) const {
+   auto it = map_.find(section_id);
+   if (it == map_.end()) return nullptr;
+--- a/src/runtime/recovery.cpp
++++ b/src/runtime/recovery.cpp
+@@ -41,6 +41,8 @@
+     ctx_.arena->RewindToCheckpoint();
+     recovery_gen_ = static_cast<uint32_t>(ctx_.arena->Generation());
+   }
++  if (ctx_.section_index) ctx_.section_index->ClearCachedViews();
++  if (ctx_.lookup_cache) ctx_.lookup_cache->ClearForRecovery();
+   recovered_ = true;
+   return Status::kOk;
+ }

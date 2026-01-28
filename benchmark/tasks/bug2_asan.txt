@@ -1,0 +1,4 @@
+# Bug B — cross-owner double-free
+attempting double-free in Arena::Release / Session::~Session
+after StageDocument (streaming dual-tracked sections) + Reindex/recovery
+pool ReleaseStagingOnly frees buffer; arena pin still owns same pointer

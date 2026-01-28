@@ -1,0 +1,8 @@
+# Bug A — multipass use-after-free
+heap-use-after-free READ in helion::endian::ReadU32LE
+  PayloadDecoder::DecodeWords
+  PayloadDecoder::DecodePayload
+  Session::DecodePayload
+  LLVMFuzzerTestOneInput (decoder_fuzzer.cc)
+freed by ObjectPool::ReleaseStagingOnly via RecoveryManager::RunRecovery / Session::Reindex
+allocated by SectionLoader::ExtractPayload / LoadAll / Session::StageDocument
