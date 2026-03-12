@@ -14,3 +14,4 @@ bool VerifyRegionChecksum(ByteSpan doc, uint32_t offset, uint32_t length, uint32
 std::vector<uint32_t> BuildChecksumChain(ByteSpan doc, const std::vector<uint32_t>& cuts);
 
 }  // namespace helion
+
