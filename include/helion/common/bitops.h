@@ -27,3 +27,4 @@ uint32_t SelectNthSetBit(uint32_t mask, unsigned n);
 
 }  // namespace bitops
 }  // namespace helion
+
