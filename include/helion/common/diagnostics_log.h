@@ -44,3 +44,4 @@ class DiagnosticsLog {
 const char* LogLevelName(LogLevel l);
 
 }  // namespace helion
+
