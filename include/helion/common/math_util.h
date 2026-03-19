@@ -26,3 +26,4 @@ uint32_t NextPrime32(uint32_t n);
 
 }  // namespace math
 }  // namespace helion
+
