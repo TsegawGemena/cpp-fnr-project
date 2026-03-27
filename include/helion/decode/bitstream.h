@@ -36,3 +36,4 @@ class BitWriter {
 
 }  // namespace decode
 }  // namespace helion
+
