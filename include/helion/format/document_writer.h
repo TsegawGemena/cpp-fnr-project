@@ -45,3 +45,4 @@ class DocumentWriter {
 
 }  // namespace format
 }  // namespace helion
+
