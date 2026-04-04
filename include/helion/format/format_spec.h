@@ -38,3 +38,4 @@ std::vector<SectionKind> ExpectedSectionOrder();
 
 }  // namespace format
 }  // namespace helion
+
