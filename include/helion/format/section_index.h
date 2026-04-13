@@ -41,3 +41,4 @@ class SectionIndex {
 
 }  // namespace format
 }  // namespace helion
+
