@@ -33,3 +33,4 @@ class StringTable {
 
 }  // namespace format
 }  // namespace helion
+
