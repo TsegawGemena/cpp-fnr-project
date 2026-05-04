@@ -25,3 +25,4 @@ const char* StatusName(Status s);
 std::string StatusMessage(Status s);
 
 }  // namespace helion
+
