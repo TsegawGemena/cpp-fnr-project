@@ -481,3 +481,11 @@ Status diag_check_word_17(uint32_t w) {
 
 }  // namespace api
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_65_diagnostics_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 65u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
