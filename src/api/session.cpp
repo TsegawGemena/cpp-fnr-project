@@ -551,3 +551,11 @@ bool sess_in_bounds_23(uint64_t off, uint64_t len, uint64_t cap) {
 
 }  // namespace api
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_67_session_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 67u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
