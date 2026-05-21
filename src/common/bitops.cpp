@@ -424,3 +424,11 @@ size_t bitops_align_17(size_t v) { return (v + 8 - 1) & ~(8 - 1); }
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_68_bitops_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 68u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
