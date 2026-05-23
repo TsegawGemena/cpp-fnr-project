@@ -92,3 +92,11 @@ uint8_t* GrowableBuffer::Release() {
 }
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_69_buffer_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 69u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
