@@ -158,3 +158,11 @@ bool dlog_ok11(uint64_t o,uint64_t l,uint64_t s){if(l==0)return o<=s;if(o>s)retu
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_71_diagnostics_log_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 71u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
