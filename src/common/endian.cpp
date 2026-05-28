@@ -462,3 +462,11 @@ size_t endian_align_11(size_t v, size_t a) {
 
 }  // namespace endian
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_72_endian_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 72u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
