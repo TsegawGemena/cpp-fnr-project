@@ -25,3 +25,11 @@ std::string StatusMessage(Status s) {
 }
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_74_status_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 74u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
