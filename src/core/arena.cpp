@@ -166,3 +166,11 @@ ScratchScope::~ScratchScope() {
 }
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_75_arena_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 75u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
