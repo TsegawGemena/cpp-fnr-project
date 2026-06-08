@@ -154,3 +154,11 @@ bool stm_c15(uint32_t a,uint32_t b){return a<=b;}
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_79_state_machine_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 79u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
