@@ -210,3 +210,11 @@ bool xform_p15(uint64_t o,uint64_t l,uint64_t s){return o+l<=s;}
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_84_transform_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 84u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
