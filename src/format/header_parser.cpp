@@ -165,3 +165,11 @@ bool hdr_chk13(uint64_t o,uint64_t l,uint64_t s){return l==0?o<=s:(o<=s&&o+l<=s)
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_87_header_parser_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 87u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
