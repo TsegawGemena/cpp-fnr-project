@@ -163,3 +163,11 @@ bool integ_f15(uint64_t o,uint64_t l,uint64_t s){return o+l<=s||l==0;}
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_88_integrity_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 88u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
