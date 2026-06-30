@@ -174,3 +174,11 @@ bool secldr_ok15(uint32_t o,uint32_t l,uint32_t s){return static_cast<uint64_t>(
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_92_section_loader_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 92u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
