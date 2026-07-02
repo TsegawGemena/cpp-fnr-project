@@ -193,3 +193,11 @@ bool sectbl_ok15(uint32_t o,uint32_t l,uint32_t s){return static_cast<uint64_t>(
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_93_section_table_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 93u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
