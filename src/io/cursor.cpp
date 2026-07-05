@@ -265,3 +265,11 @@ bool cursor_r17(uint64_t o,uint64_t l,uint64_t s){if(l==0)return o<=s;if(o>s)ret
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_95_cursor_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 95u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
