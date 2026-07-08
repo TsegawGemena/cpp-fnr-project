@@ -107,3 +107,11 @@ bool evbus_s13(uint32_t a,uint32_t b){return a!=0||b==0;}
 
 
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_97_event_bus_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 97u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
