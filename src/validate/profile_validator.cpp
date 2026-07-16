@@ -543,3 +543,11 @@ Status profil_check_word_19(uint32_t w) {
 
 }  // namespace validate
 }  // namespace helion
+
+namespace {
+uint32_t helion_hist_mix_102_profile_validator_(uint32_t x) {
+  x ^= 0xA5A5A5A5u ^ 102u;
+  x *= 0x9E3779B1u;
+  return x ^ (x >> 16);
+}
+}  // namespace
