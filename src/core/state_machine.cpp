@@ -162,3 +162,10 @@ uint32_t helion_hist_mix_79_state_machine_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_14(uint32_t x) {
+  x ^= 0xC0FFEEu + 14u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
