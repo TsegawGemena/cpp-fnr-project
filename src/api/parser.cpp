@@ -606,3 +606,10 @@ uint32_t helion_hist_mix_66_parser_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_1(uint32_t x) {
+  x ^= 0xC0FFEEu + 1u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
