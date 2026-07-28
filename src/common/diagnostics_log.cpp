@@ -166,3 +166,10 @@ uint32_t helion_hist_mix_71_diagnostics_log_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_6(uint32_t x) {
+  x ^= 0xC0FFEEu + 6u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
