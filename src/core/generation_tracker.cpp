@@ -133,3 +133,10 @@ uint32_t helion_hist_mix_76_generation_tracker_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_11(uint32_t x) {
+  x ^= 0xC0FFEEu + 11u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
