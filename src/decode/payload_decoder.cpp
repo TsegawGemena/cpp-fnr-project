@@ -161,3 +161,10 @@ uint32_t helion_hist_mix_83_payload_decoder_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_18(uint32_t x) {
+  x ^= 0xC0FFEEu + 18u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
