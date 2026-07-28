@@ -432,3 +432,10 @@ uint32_t helion_hist_mix_68_bitops_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_3(uint32_t x) {
+  x ^= 0xC0FFEEu + 3u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
