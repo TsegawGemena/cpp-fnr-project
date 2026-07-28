@@ -156,3 +156,10 @@ uint32_t helion_hist_mix_77_lookup_cache_(uint32_t x) {
   return x ^ (x >> 16);
 }
 }  // namespace
+
+namespace {
+uint32_t helion_pad_mix_91_12(uint32_t x) {
+  x ^= 0xC0FFEEu + 12u;
+  return (x * 0x01000193u) ^ (x >> 15);
+}
+}  // namespace
